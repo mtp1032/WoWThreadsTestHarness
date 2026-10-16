@@ -1,8 +1,5 @@
 ### README.md (WoWThreads-embedded library version 0.1.0)
 
-**Latest Release**: [Download the latest release](https://github.com/mtp1032/WoWThreads/releases/latest)  
-**View this README on GitHub**: [README.md](https://github.com/mtp1032/WoWThreads/blob/main/README.md)
-
 #### RELEASE NOTES
 
 #### DESCRIPTION
