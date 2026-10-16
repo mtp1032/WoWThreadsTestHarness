@@ -19,8 +19,8 @@ if not thread then
     print("Failed to create WoWThreads library") 
     return 
 end
-local utils = UtilsLib
-local sig   = SignalQueue
+local UtilsLib = ns.UtilsLib
+local SignalQueue   = ns.SignalQueue
 
 local CURRENT_RUNNING_THREAD = nil
 local DEFAULT_YIELD_TICKS    = 1
@@ -193,7 +193,7 @@ local function wakeupThread(H)
             table.remove( threadSleepTable, i )
             table.insert( threadControlBlock, H )			        
             H[TH_REMAINING_TICKS] = 1
-			local logStr = string.format("%s thread[%d] is awake. Returned to TCB", utils:dbgPrefix(), H[TH_UNIQUE_ID])
+			local logStr = string.format("%s thread[%d] is awake. Returned to TCB", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID])
 			-- dbgLog( logStr )
             return H, nil
         end
@@ -224,7 +224,7 @@ local function createHandle( addonName, parent_h, yieldTicks, threadFunction, ..
     local H = {
         [TH_COROUTINE] = coroutine.create(threadFunction),
         [TH_UNIQUE_ID]          = THREAD_SEQUENCE_ID,
-        [TH_SIGNAL_QUEUE]       = sig.new(),
+        [TH_SIGNAL_QUEUE]       = SignalQueue:new(),
         [TH_YIELD_TICKS]        = yieldTicks,
         [TH_REMAINING_TICKS]    = 1,
         [TH_ELAPSED_TICKS]      = ACCUMULATED_TICKS,
@@ -280,10 +280,10 @@ local function moveToSleepTable( H )
             table.remove(threadControlBlock, i)
             table.insert( threadSleepTable, H )
             successful = true
-            -- dbgLog( string.format("%s Thread[%d] removed from TCB, inserted into sleep table.\n", utils:dbgPrefix(), H[TH_UNIQUE_ID]) )
+            -- dbgLog( string.format("%s Thread[%d] removed from TCB, inserted into sleep table.\n", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID]) )
             return successful, nil
         end
-		return nil, string.format("%s Sleep failed. Thread[%d] not put to sleep.", utils:dbgPrefix(), H[TH_UNIQUE_ID] )
+		return nil, string.format("%s Sleep failed. Thread[%d] not put to sleep.", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID] )
     end
 
     if not successful then
@@ -334,7 +334,7 @@ end
 local function resumeThread(H)
     local co = H[TH_COROUTINE]
     local args = H[TH_COROUTINE_ARGS] or {} -- Ensure args is a table
-	-- dbgLog(string.format("%s Resuming Thread[%d]", utils:dbgPrefix(), H[TH_UNIQUE_ID]))
+	-- dbgLog(string.format("%s Resuming Thread[%d]", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID]))
 
     -- Define error handler for xpcall using debugstack
     local function errorHandler(err)
@@ -348,19 +348,19 @@ local function resumeThread(H)
 
     local xpcallSucceeded = xpcallResults[1]
     if not xpcallSucceeded then
-        -- dbgLog(string.format("%s Thread[%d] XPCALL failed: %s", utils:dbgPrefix(), H[TH_UNIQUE_ID], tostring(xpcallResults[2])))
+        -- dbgLog(string.format("%s Thread[%d] XPCALL failed: %s", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID], tostring(xpcallResults[2])))
         moveToMorgue(H, false )
 		return false, formatErrorMsg( "resumeThread()", xpcallResults[2], debugstack(2))
     end
 
     local coroutineSucceeded = xpcallResults[2]
     if not coroutineSucceeded then
-		-- dbgLog(string.format("%s Thread[%d] XPCALL failed: %s", utils:dbgPrefix(), H[TH_UNIQUE_ID], tostring(xpcallResults[2]):gsub("\n", "\n  ")))        
+		-- dbgLog(string.format("%s Thread[%d] XPCALL failed: %s", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID], tostring(xpcallResults[2]):gsub("\n", "\n  ")))        
         return false, xpcallResults[3]
     end
 
     if coroutine.status(co) == "dead" then
-        -- dbgLog(string.format("%s Thread[%d] has has completed", utils:dbgPrefix(), H[TH_UNIQUE_ID]))
+        -- dbgLog(string.format("%s Thread[%d] has has completed", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID]))
         moveToMorgue(H, true)
         return true, nil
     end
@@ -378,7 +378,7 @@ local function scheduleThreads()
                 table.remove(threadDelayTable, i)
                 table.insert(threadControlBlock, H)
                 H[TH_REMAINING_TICKS] = H[TH_YIELD_TICKS]
-                -- dbgLog(string.format("%s Thread[%d] delay expired, moved to TCB.", utils:dbgPrefix(), H[TH_UNIQUE_ID]))
+                -- dbgLog(string.format("%s Thread[%d] delay expired, moved to TCB.", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID]))
             end
         end
     end
@@ -398,7 +398,7 @@ local function scheduleThreads()
                 local success, errorString = resumeThread(H)
                 ---------------------------------------
                 if not success then
-                    -- dbgLog(string.format("%s Thread[%d] error: %s", utils:dbgPrefix(), H[TH_UNIQUE_ID], errorString ))
+                    -- dbgLog(string.format("%s Thread[%d] error: %s", UtilsLib:dbgPrefix(), H[TH_UNIQUE_ID], errorString ))
 				end
             end
         end
@@ -506,7 +506,7 @@ function thread:create( yieldTicks, threadFunction,... )
     end
 
     table.insert( threadControlBlock, H )
-    -- dbgLog( string.format("%s Thread[%d] inserted into TCB.", utils:dbgPrefix(),  H[TH_UNIQUE_ID]))
+    -- dbgLog( string.format("%s Thread[%d] inserted into TCB.", UtilsLib:dbgPrefix(),  H[TH_UNIQUE_ID]))
     return H, nil
 end
 
@@ -1068,7 +1068,7 @@ function thread:getSignal()
 
     local H  = getHandleOfCallingThread()
 	if H == nil then
-		result = utils:formatErrorMsg( "Thread handle was nil", fname, debugstack(3) )
+		result = formatErrorMsg( "Thread handle was nil", fname, debugstack(3) )
 		return nil, result
 	end
 
