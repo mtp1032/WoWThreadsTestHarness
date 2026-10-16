@@ -5,24 +5,27 @@
 ---------------------------------------------------------------
 ADDON_NAME, ns = ...
 
-SignalQueue = SignalQueue or {}
+ns.SignalQueue = ns.SignalQueue or {}
+local sig = ns.SignalQueue
 
 -- Class definition
 local SignalTable = {}
 SignalTable.__index = SignalTable
 
-function SignalQueue.new()
+local sigTable = SignalTable
+
+function sig:new()
     local self = setmetatable({}, SignalTable)
     self.front = 1
     self.rear = 0
     self.items = {}
     return self
 end
-function SignalTable:enqueue(value)
+function sigTable:enqueue(value)
     self.rear = self.rear + 1
     self.items[self.rear] = value
 end
-function SignalTable:dequeue()
+function sigTable:dequeue()
     if self:isEmpty() then
         return nil
     end
@@ -38,16 +41,16 @@ function SignalTable:dequeue()
 
     return value
 end
-function SignalTable:peek() 
+function sigTable:peek() 
     if self:isEmpty() then
         return nil
     end
     return self.items[self.front]
 end
-function SignalTable:isEmpty()
+function sigTable:isEmpty()
     return self.front > self.rear
 end
-function SignalTable:size()
+function sigTable:size()
     return self.rear - self.front + 1
 end
 return SignalQueue
