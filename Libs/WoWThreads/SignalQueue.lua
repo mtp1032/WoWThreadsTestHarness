@@ -3,6 +3,7 @@
 -- Author: Michael Peterson
 -- Date: October, 2026
 ---------------------------------------------------------------
+ADDON_NAME, ns = ...
 
 SignalQueue = SignalQueue or {}
 
