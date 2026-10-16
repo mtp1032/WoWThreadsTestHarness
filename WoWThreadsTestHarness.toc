@@ -1,0 +1,17 @@
+## Interface: 120100
+## Title: WoWThreads Test Harness
+## X-MAJOR: 0
+## X-MINOR: 0
+## X-PATCH: 1
+## Notes: Test addon for WoWThreads embedded library
+## Author: Michael Peterson
+## Category: Development Tools
+
+# Load the embedded library first
+Libs/LibStub/LibStub.lua
+Libs/WoWThreads/UtilsLib.lua
+Libs/WoWThreads/SignalQueue.lua
+Libs/WoWThreads/WoWThreads.lua
+
+# Then load your addon
+Prototype.lua
