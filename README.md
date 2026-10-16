@@ -8,7 +8,8 @@ WoWThreads-embedded is a framework for automatically testing the embedded librar
 #### PERFORMANCE
 <TBD>
 #### INSTALLATION
-I download from github.
+Download from github at 
+https://github.com/mtp1032/WoWThreadsTestHarness
 ```
 ##### SUPPORT
 For more information and examples, two documents can be found in the your local WoWThreads' Docs directory or in the addon's github docs directory:
