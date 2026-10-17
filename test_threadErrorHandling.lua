@@ -3,7 +3,7 @@
 --=================================================================================
 
 local ADDON_NAME, ns = ...
-
+ns.Scaffold = ns.Scaffold or {}
 local Scaffold = ns.Scaffold
 local master_h = nil
 
@@ -34,54 +34,64 @@ local function dummy()
     local myName = nil
     local foo = myName[1]
 end
-local function parameterTests()
-    local thread_h = nil
-    local errorMsg = nil
+function test_threadCreateErrors()
+    print( "Entered test_threadCreateErrors()")
+
+    -- these 3 tests are expected to fail according the validity of a function argument
+    local thread_h, errorMsg = thread:create( 10, "invalid Function" )
+    assert( thread_h ~= nil, errorMsg )
+
+    thread_h, errorMsg = thread:create( "invalid Tick Count", dummy )
+    assert( thread_h ~= nil, errorMsg )
+    print(1)
     
-    -- test thread:create() function arguments
-    thread_h, errorMsg = thread:create( "stringParam", dummy )
+    -- this test throws a Lua fault within the thread's function
+    thread_h, errorMsg = thread:create( dummy )
     assert( thread_h ~= nil, errorMsg )
+    print(2)
 
-    thread_h, errorMsg = thread:create( 30, "hello")
+    thread_h, errorMsg = thread:sendSignal( master_h, SIG_IS_COMPLETE)
     assert( thread_h ~= nil, errorMsg )
+    print(3)
 
-    -- this will succeed, but the thread function will throw a Lua error.
-    -- In other words, the thread creation will succeed and no error will propagate
-    -- up through the WoWThread's stack.
-    thread_h, errorMsg = thread:create( 30, dummy )
-    assert( thread_h ~= nil, errorMsg )
-  
-    -- testing is done. Notify the master thread and exit.
-    local wasSent, errorMsg = thread:sendSignal( master_h, SIG_IS_COMPLETE )
-    assert( wasSent, errorMsg )
+    Scaffold:reportFail("Thread Creation Error Handling")
 end
-local function test_threadCreateErrors()
 
-    -- this test is expected to succeed with a non-nil handle and a nil errorMsg
-    local thread_h, errorMsg = thread:create( 10, parameterTests )
-    assert( thread_h ~= nil, errorMsg )
- 
-    while signal ~= SIG_NONE_PENDING do
-        thread:yield()
-        local sigEntry, errorMsg = thread:getSignal() 
-        assert( signal ~= nil, errorMsg )
-        local signal = sigEntry[1]
-        local sender_h = sigEntry[2]
+local function master()
+    print( "created master_h")
+    -- =================================================
+    -- TEST 1: Creates threads with bad parameters
+    -- =================================================
+    local createTest_h, errorMsg = thread:create( 30, test_threadCreateErrors )
+    assert( createTest_h ~= nil, errorMsg )
 
-        if signal[1] == SIG_IS_COMPLETE then
-            thread:sendSignal( signal[2], SIG_TERMINATE)
-        end
-        if signal[1] == SIG_TERMINATE then
-            DONE = true 
-        end
+    thread:yield()
+    DONE = false
+
+    local count = 1
+    while not DONE do
+        local sigEntry, errorMsg = thread:getSignal()
+        assert( sigEntry ~= false, errorMsg )
+
+        sigEntry, errorMsg = thread:getSignal()
+        local signal    = sigEntry[1]
+        local sender_h  = sigEntry[2]
+        local error     = sigEntry[3]
+
+        assert( false, "FAIL: " .. error )
+        count = count + 1
+        if count == 3 then DONE = true end
     end
-
-    Scaffold.reportPass("test_threadErrorHandling")
 end
--- Register the master thread with the scaffold
-Scaffold.registerTest("test_threadErrorHandling", test_threadCreateErrors )
+Scaffold:registerTest("Thread Creation Error Handling", test_threadCreateErrors )
+-- ScaffoldregisterTest("Signal Send/receive Error Handling", test_threadSignalingErrors )
+-- ScaffoldregisterTest("test_threadErrorHandling", test_threadCreateErrors )
+-- ScaffoldregisterTest("test_threadErrorHandling", test_threadCreateErrors )
+-- ScaffoldregisterTest("test_threadErrorHandling", test_threadCreateErrors )
+-- ScaffoldregisterTest("test_threadErrorHandling", test_threadCreateErrors )
 
 
 -- this thread creates the service that runs all the tests.
-master_h, errorMsg = thread:create( 30, test_threadCreateErrors )
+master_h, errorMsg = thread:create( 30, master )
 assert( master_h ~= nil, errorMsg )
+
