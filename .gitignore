@@ -1,0 +1,17 @@
+
+# Ignore prototype code directories anywhere
+**/Prototypes/
+
+# Ignore notes directories anywhere
+**/Notes/
+
+# Ignore VS Code workspace files
+*.code-workspace
+
+# Ignore VS Code settings if present
+.vscode/
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
