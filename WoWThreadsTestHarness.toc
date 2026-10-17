@@ -12,6 +12,7 @@ Libs/LibStub/LibStub.lua
 Libs/WoWThreads/UtilsLib.lua
 Libs/WoWThreads/SignalQueue.lua
 Libs/WoWThreads/WoWThreads.lua
+Libs/WoWThreads/WoWThreadsTestScaffold.lua
 
 # Then load your addon
-Prototype.lua
+test_threadErrorHandling.lua
