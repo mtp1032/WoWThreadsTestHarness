@@ -1064,11 +1064,11 @@ Usage:
 function thread:getSignal()
     local fname 	= "getSignal()"
     local sigEntry 	= nil
-    local result 	= nil
+    local errorMsg 	= nil
 
     local H  = getHandleOfCallingThread()
 	if H == nil then
-		result = formatErrorMsg( "Thread handle was nil", fname, debugstack(3) )
+		errorMsg = formatErrorMsg( fname, "Thread handle was nil" )
 		return nil, result
 	end
 
