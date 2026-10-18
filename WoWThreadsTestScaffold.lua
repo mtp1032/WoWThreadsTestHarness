@@ -12,7 +12,6 @@ if not thread then
     error("WoWThreads library not found.")
 end
 
-
 -- Internal storage for registered tests
 local tests = {}
 local results = {
@@ -68,7 +67,7 @@ function Scaffold:runAllTests()
     print(" ")
 
     for _, t in ipairs(tests) do
-        local ok, msg = pcall(t.fn)
+        local passed, msg = pcall(t.fn)
         if ok then
             Scaffold:reportPass(t.name)
         else
@@ -94,15 +93,12 @@ function Scaffold:printSummary()
     print(" ")
 end
 
-local function OnAddonLoaded()
-    thread:libraryInit()  -- start the scheduler
-    DEFAULT_CHAT_FRAME:AddMessage(string.format("%s v0.1.0 initialized.", "WoWthreads-embedded"), 0, 1, 1)
-end
-
-local frame = CreateFrame("Frame")
-frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(_, _, ADDON_NAME)
-    if ADDON_NAME == "WoWThreadsTestHarness" then
-        OnAddonLoaded()
+local function OnEvent(self, event, ...)
+    local ADDON_NAME = select(1, ...)
+    if event == "ADDON_LOADED" and ADDON_NAME == "WoWThreadsLib" then
+        eventFrame:UnregisterEvent( "ADDON_LOADED" )
+        thread:libInit() -- Assuming this is defined elsewhere
+        DEFAULT_CHAT_FRAME:AddMessage(L["ADDON_LOADED_MSG"], 0.0, 1.0, 0)
     end
-end)
+end
+eventFrame:SetScript("OnEvent", OnEvent)

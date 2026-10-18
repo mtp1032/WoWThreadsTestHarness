@@ -30,34 +30,34 @@ local SIG_NONE_PENDING = thread.SIG_NONE_PENDING
 --=================================================================================
 -- Test: threadErrorHandling
 --=================================================================================
-local function dummy()
+-- create a Lua error
+local function luaErrorOne()
     local myName = nil
     local foo = myName[1]
+    return
 end
-function test_threadCreateErrors()
-    print( "Entered test_threadCreateErrors()")
+-- Wapper function for thread creation errors
+local function wrapper()
+function test_ThreadCreationErrors()
 
-    -- these 3 tests are expected to fail according the validity of a function argument
-    local thread_h, errorMsg = thread:create( 10, "invalid Function" )
-    assert( thread_h ~= nil, errorMsg )
+        -- thread:create - Invalid function type
+        local thread_h, errorMsg = thread:create( 10, "invalidFunction" )
+        assert( thread_h ~= nil, errorMsg )
 
-    thread_h, errorMsg = thread:create( "invalid Tick Count", dummy )
-    assert( thread_h ~= nil, errorMsg )
-    print(1)
-    
-    -- this test throws a Lua fault within the thread's function
-    thread_h, errorMsg = thread:create( dummy )
-    assert( thread_h ~= nil, errorMsg )
-    print(2)
+        -- thread:create - Invalid tick count.
+        thread_h, errorMsg = thread:create( "invalidTickCount", luaErrorOne )
+        assert( thread_h ~= nil, errorMsg )
+        print(1)
+        
+        -- thread:create - Lua fault in thread's function
+        thread_h, errorMsg = thread:create( 20, luaErrorOne )
+        assert( thread_h ~= nil, errorMsg )
+        print(2)
 
-    thread_h, errorMsg = thread:sendSignal( master_h, SIG_IS_COMPLETE)
-    assert( thread_h ~= nil, errorMsg )
-    print(3)
-
-    Scaffold:reportFail("Thread Creation Error Handling")
+        Scaffold:reportFail("Thread Creation Error Handling")
+    end
 end
-
-local function master()
+local function test_errorsThreadCreation()
     print( "created master_h")
     -- =================================================
     -- TEST 1: Creates threads with bad parameters
@@ -82,6 +82,9 @@ local function master()
         count = count + 1
         if count == 3 then DONE = true end
     end
+end
+
+local function master()
 end
 Scaffold:registerTest("Thread Creation Error Handling", test_threadCreateErrors )
 -- ScaffoldregisterTest("Signal Send/receive Error Handling", test_threadSignalingErrors )

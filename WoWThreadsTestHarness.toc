@@ -5,6 +5,11 @@
 ## Author: Michael Peterson
 ## Category: Development Tools
 ## Dependencies: WoWThreadsLib
+## X-MAJOR: 0
+## X-MINOR: 1
+## X-PATCH: 0
 
-WoWThreadsTestScaffold.lua
-test_threadErrorHandling.lua
+Locales.lua
+Globals.lua
+##WoWThreadsTestScaffold.lua
+## test_threadErrorHandling.lua
